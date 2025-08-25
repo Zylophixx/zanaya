@@ -15,7 +15,7 @@ export function ConfirmationPage() {
         {/* Success Message */}
         <h2 className="text-3xl font-bold text-gray-900 mb-4">Booking Submitted Successfully!</h2>
         <p className="text-gray-600 mb-8 text-lg">
-          Your ZANAYA service request has been sent via WhatsApp. Our compassionate team will contact you shortly to confirm the details and arrange the services.
+          Your ZANAYA service request has been sent. Our compassionate team will contact you shortly to confirm the details and arrange the services.
         </p>
 
         {/* Contact Information */}
