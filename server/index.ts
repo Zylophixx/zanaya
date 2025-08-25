@@ -17,16 +17,24 @@ app.use(express.json());
 const createTransporter = () => {
   // Check if email configuration is available
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-    console.warn('Warning: Email configuration not found. Email functionality will be disabled.');
+    console.error('❌ Email configuration missing! Please set EMAIL_USER and EMAIL_PASSWORD in .env file');
+    console.log('📧 To fix: Copy .env.example to .env and update with your Gmail credentials');
     return null;
   }
 
+  console.log('📧 Email configured for:', process.env.EMAIL_USER);
+  
   return nodemailer.createTransporter({
     service: 'gmail', // You can change this to your email provider
+    port: 587,
+    secure: false,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD, // Use app password for Gmail
     },
+    tls: {
+      rejectUnauthorized: false
+    }
   });
 };
 
@@ -178,29 +186,47 @@ app.post('/api/submit-booking', async (req, res) => {
     // Send email only if transporter is available
     if (transporter) {
       try {
+        // Verify transporter configuration
+        await transporter.verify();
+        console.log('✅ Email transporter verified successfully');
+        
         // Email content
         const emailHTML = generateEmailHTML(bookingData);
         
         const mailOptions = {
           from: process.env.EMAIL_USER,
-          to: "aasiyanaqvi6@gmail.com",  // Send to admin email
+          to: process.env.ADMIN_EMAIL || "aasiyanaqvi6@gmail.com",
           subject: `New ZANAYA Booking - ${bookingData.personalInfo.name}`,
           html: emailHTML,
         };
 
+        console.log('📤 Sending email to:', mailOptions.to);
+        
         // Send email
-        await transporter.sendMail(mailOptions);
-        console.log('Email sent successfully');
+        const info = await transporter.sendMail(mailOptions);
+        console.log('✅ Email sent successfully:', info.messageId);
       } catch (emailError) {
-        console.error('Error sending email:', emailError);
+        console.error('❌ Error sending email:', emailError);
+        
+        // Provide specific error guidance
+        if (emailError.code === 'EAUTH') {
+          console.error('🔐 Authentication failed. Please check:');
+          console.error('   1. EMAIL_USER is correct');
+          console.error('   2. EMAIL_PASSWORD is an App Password (not regular password)');
+          console.error('   3. 2-factor authentication is enabled on Gmail');
+        } else if (emailError.code === 'ECONNECTION') {
+          console.error('🌐 Connection failed. Check your internet connection.');
+        }
+        
         // Don't fail the entire request if email fails
       }
     } else {
-      console.log('Email not configured - booking saved without email notification');
+      console.log('⚠️  Email not configured - booking saved without email notification');
+      console.log('📧 To enable emails: Set EMAIL_USER and EMAIL_PASSWORD in .env file');
     }
 
     // Log booking for debugging (in production, save to database)
-    console.log('New booking received:', {
+    console.log('📋 New booking received:', {
       timestamp: new Date().toISOString(),
       customer: bookingData.personalInfo.name,
       religion: bookingData.religion.name,
@@ -229,6 +255,6 @@ app.get('/api/health', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`✅ ZANAYA Backend Server running on port ${PORT}`);
-  console.log(`📧 Email configured: ${process.env.EMAIL_USER ? 'Yes' : 'No'}`);
+  console.log(`📧 Email configured: ${process.env.EMAIL_USER ? 'Yes (' + process.env.EMAIL_USER + ')' : 'No - Please configure .env file'}`);
   console.log(`🔗 API endpoint: http://localhost:${PORT}/api`);
 });
