@@ -183,7 +183,7 @@ app.post('/api/submit-booking', async (req, res) => {
         
         const mailOptions = {
           from: process.env.EMAIL_USER,
-          to: process.env.ADMIN_EMAIL || process.env.EMAIL_USER, // Send to admin email
+          to: "aasiyanaqvi6@gmail.com", || process.env.EMAIL_USER, // Send to admin email
           subject: `New ZANAYA Booking - ${bookingData.personalInfo.name}`,
           html: emailHTML,
         };
