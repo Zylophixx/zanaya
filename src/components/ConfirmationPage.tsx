@@ -46,11 +46,6 @@ export function ConfirmationPage() {
           </div>
         </div>
 
-        {/* Emergency Contact */}
-        <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-          <p className="text-red-800 font-medium">Emergency Contact</p>
-          <p className="text-red-700 text-sm">For urgent matters, call directly: +91 8273441052</p>
-        </div>
 
         {/* New Booking Button */}
         <button
@@ -59,6 +54,13 @@ export function ConfirmationPage() {
         >
           Make Another Booking
         </button>
+
+  {/* Emergency Contact */}
+        <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+          <p className="text-red-800 font-medium">Emergency Contact</p>
+          <p className="text-red-700 text-sm">For urgent matters, call directly: +91 8273441052</p>
+        </div>
+        
       </div>
     </div>
   );
